@@ -6,12 +6,10 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
 import xlrd
+import csv
 import pandas as pd
 
-excel_werte = pd.read_csv("input.csv", sep=";") #, skiprows=2
-#excel_werte = np.genfromtxt('input.csv', delimiter=';')
+data = np.genfromtxt('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';')
 
-print(excel_werte['2'][0])
-#p.r.risch = b.r0ke
 
-print(excel_werte)
+print(data)
