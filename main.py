@@ -3,10 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_blobs
-from sklearn.cluster import KMeans
-import xlrd
-import csv
+import sklearn as sk
 import pandas as pd
 
 data = np.genfromtxt('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';')
