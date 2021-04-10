@@ -11,5 +11,6 @@ import pandas as pd
 excel_werte = pd.read_csv("input.csv", sep=";") #, skiprows=2
 #excel_werte = np.genfromtxt('input.csv', delimiter=';')
 
+#p.r.risch = b.r0ke
 
 print(excel_werte)
