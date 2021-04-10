@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 
 data = np.genfromtxt('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';')
+cluster = data[0][0]
+rows = data[1][0]
+cols = data[1][1]
+print(cluster, rows, cols)
 
-
-print(data)
