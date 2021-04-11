@@ -1,63 +1,50 @@
-# MME2: BII assignment 3 - k-means clustering
+# MME2: BI Assignment 3 - K-Means Clustering
 # SEISL Philipp (me20m003) & RIRSCH Karl-Philipp (me20m002)
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sklearn as sk
-from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
 import pandas as pd
 from copy import deepcopy
+from scipy.spatial.distance import cdist
 
 # Read information like clusters, rows and columns
 info = np.genfromtxt('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';')
-clusters = int(info[0][0])
-rows = int(info[1][0])
-cols = int(info[1][1])
+clusters = int(info[0][0])  # Get cluster count
+rows = int(info[1][0])      # Get row count
+cols = int(info[1][1])      # Get column count
 
 # Read only the location of datapoints
 df = pd.read_csv('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';', decimal=',', skiprows=1)
 kmeans = KMeans(clusters)
 kmeans.fit(df)
-df['cluster'] = kmeans.fit_predict(df)  # predict cluster belonging
+df['cluster'] = kmeans.fit_predict(df)  # Add column to data frame for cluster assignment with prediction
 
-data = df.values[:, 0:2]    # convert DataFrame to numpy-Array
-cluster = df.values[:, 2]   # save cluster variable
+data = df.values[:, 0:2]    # save coordinates from dataframe to Numpy-compatible array
+cluster = df.values[:, 2]   # save cluster assignment variables Numpy-compatible array
 
 # Generate Random starting points for centroids
-mean = np.mean(data, axis=0)
-std = np.std(data, axis=0)
-print(mean, std)
-centers = np.random.randn(clusters, cols)*std + mean
+mean = np.mean(data, axis=0)    # Calculate the mean value of coordinates
+std = np.std(data, axis=0)      # Calculate the standard deviation of coordinates
+centers = np.random.randn(clusters, cols)*std + mean    # Create random centroids by amount of clusters with boundaries
 
+# Initialization for Centroid iteration loop
+centers_old = np.zeros(centers.shape)   # Create Zero-Matrix to store old center coordinates
+distances = np.zeros((rows, clusters))  # Create Zero-Matrix to store distances
+error = np.linalg.norm(centers - centers_old)   # Calculate Matrix-norm as error indicator
+iterations = 0
 
-
-# Iterate Centroids
-centers_old = np.zeros(centers.shape)  # to store old centers
-centers_new = deepcopy(centers)  # Store new centers
-
-data.shape
-clusters0 = np.zeros(rows)
-distances = np.zeros((rows, clusters))
-
-error = np.linalg.norm(centers_new - centers_old)
-
-# When, after an update, the estimate of that center stays the same, exit loop
+# Move centers until they stay in place, then exit the loop
 while error != 0:
-    # Measure the distance to every center
+    distances = cdist(data, centers, metric='cityblock')    # Measure the distance to centers using Manhattan distance
+    cluster = np.argmin(distances, axis=1)  # Assign data points to closest center/cluster
+    centers_old = deepcopy(centers)     # Store old center coordinates
     for i in range(clusters):
-        distances[:, i] = np.linalg.norm(data - centers_new[i], axis=1)
-    # Assign all training data to closest center
-    clusters0 = np.argmin(distances, axis=1)
+        centers[i] = np.mean(data[cluster == i], axis=0)    # Calculate cluster means and update centers
+    error = np.linalg.norm(centers - centers_old)   # Calculate new error value
+    iterations += 1     # Count iterations
 
-    centers_old = deepcopy(centers_new)
-    # Calculate mean for every cluster and update the center
-    for i in range(clusters):
-        centers_new[i] = np.mean(data[clusters0 == i], axis=0)
-    error = np.linalg.norm(centers_new - centers_old)
-centers = deepcopy(centers_new)
-
-# Create a Scatter-Plot
-plt.scatter(data[:, 0], data[:, 1], c=cluster, cmap='rainbow', s=10)
-plt.scatter(centers[:, 0], centers[:, 1], marker='d', c='grey', s=50)
+# Generate Scatter-Plot
+plt.scatter(data[:, 0], data[:, 1], c=cluster, cmap='rainbow', s=10)    # Data points
+plt.scatter(centers[:, 0], centers[:, 1], marker='d', c='grey', s=50)   # Centroids
 plt.show()
