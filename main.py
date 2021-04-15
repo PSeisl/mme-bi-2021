@@ -3,10 +3,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 import pandas as pd
 from copy import deepcopy
 from scipy.spatial.distance import cdist
+import csv
 
 # Read information like clusters, rows and columns
 info = np.genfromtxt('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';')
@@ -16,9 +16,7 @@ cols = int(info[1][1])      # Get column count
 
 # Read only the location of datapoints
 df = pd.read_csv('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';', decimal=',', skiprows=1)
-kmeans = KMeans(clusters)
-kmeans.fit(df)
-df['cluster'] = kmeans.fit_predict(df)  # Add column to data frame for cluster assignment with prediction
+df['cluster'] = 0 # Add column to data frame for cluster assignment with prediction
 
 data = df.values[:, 0:2]    # save coordinates from dataframe to Numpy-compatible array
 cluster = df.values[:, 2]   # save cluster assignment variables Numpy-compatible array
@@ -43,8 +41,19 @@ while error != 0:
         centers[i] = np.mean(data[cluster == i], axis=0)    # Calculate cluster means and update centers
     error = np.linalg.norm(centers - centers_old)   # Calculate new error value
     iterations += 1     # Count iterations
-
+    print(error)
+print(iterations)
 # Generate Scatter-Plot
 plt.scatter(data[:, 0], data[:, 1], c=cluster, cmap='rainbow', s=10)    # Data points
 plt.scatter(centers[:, 0], centers[:, 1], marker='d', c='grey', s=50)   # Centroids
 plt.show()
+
+# Save Data to Output CSV-file
+with open('output.csv', 'w+', newline='') as output:
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(str(iterations))
+    writer.writerow(str(centers))
+    writer.writerow(str(clusters))
+    writer.writerow(str(rows), str(cols))
+    writer.writerow(str(data))
+1
