@@ -16,7 +16,7 @@ cols = int(info[1][1])      # Get column count
 
 # Read only the location of datapoints
 df = pd.read_csv('input.csv', dtype=None, encoding='utf-8-sig', delimiter=';', decimal=',', skiprows=1)
-df['cluster'] = 0 # Add column to data frame for cluster assignment with prediction
+df['cluster'] = 0   # Add column to data frame for cluster assignment with prediction
 
 data = df.values[:, 0:2]    # save coordinates from dataframe to Numpy-compatible array
 cluster = df.values[:, 2]   # save cluster assignment variables Numpy-compatible array
@@ -41,19 +41,22 @@ while error != 0:
         centers[i] = np.mean(data[cluster == i], axis=0)    # Calculate cluster means and update centers
     error = np.linalg.norm(centers - centers_old)   # Calculate new error value
     iterations += 1     # Count iterations
-    print(error)
-print(iterations)
+
+df['cluster'] = cluster     # Save new Cluster assignments to DataFrame
+
 # Generate Scatter-Plot
 plt.scatter(data[:, 0], data[:, 1], c=cluster, cmap='rainbow', s=10)    # Data points
 plt.scatter(centers[:, 0], centers[:, 1], marker='d', c='grey', s=50)   # Centroids
 plt.show()
 
 # Save Data to Output CSV-file
+df = df[['cluster', str(rows), str(cols)]]  # Rearrange DataFrame Columns
+df_center = pd.DataFrame(centers)   # Convert Numpy-Array do Pandas DataFrame for easier CSV export
+
 with open('output.csv', 'w+', newline='') as output:
     writer = csv.writer(output, delimiter=';')
     writer.writerow(str(iterations))
-    writer.writerow(str(centers))
+    df_center.to_csv(output, sep=';', mode='a', index=False, header=False)
     writer.writerow(str(clusters))
-    writer.writerow(str(rows), str(cols))
-    writer.writerow(str(data))
-1
+    writer.writerow([str(rows), str(cols)])
+    df.to_csv(output, sep=';', mode='a', index=False, header=False)
